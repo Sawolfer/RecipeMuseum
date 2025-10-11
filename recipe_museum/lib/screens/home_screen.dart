@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../interactors/api_service.dart';
+import '../components/recipe_card.dart';
+import '../models/recipe_model.dart';
 import '../utils/constants.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,6 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
+  List<Recipe> _recipes = [];
   bool _isLoading = true;
 
   @override
@@ -21,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
     final recipes = await _apiService.getRandomRecipes();
     setState(() {
+      _recipes = recipes;
       _isLoading = false;
     });
   }
@@ -29,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
     final recipes = await _apiService.searchRecipes(query);
     setState(() {
+      _recipes = recipes;
       _isLoading = false;
     });
   }
@@ -68,6 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+          ),
+          
+          // Рецепты
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _recipes.isEmpty
+                    ? Center(child: Text('Рецепты не найдены 😔'))
+                    : ListView.builder(
+                        itemCount: _recipes.length,
+                        itemBuilder: (context, index) {
+                          return RecipeCard(recipe: _recipes[index]);
+                        },
+                      ),
           ),
         ],
       ),
