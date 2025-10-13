@@ -9,6 +9,7 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = recipe.imageUrl;
     return Card(
       margin: EdgeInsets.all(8),
       child: InkWell(
@@ -21,13 +22,24 @@ class RecipeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (recipe.imageUrl != null)
+            if (imageUrl != null)
               Image.network(
-                recipe.imageUrl!,
+                imageUrl,
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
-              ),
+                errorBuilder: (context, error, stackTrace) {
+                  return _buildImagePlaceholder();
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return _buildImagePlaceholder(isLoading: true);
+                },
+              )
+            else
+              _buildImagePlaceholder(),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -67,6 +79,32 @@ class RecipeCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImagePlaceholder({bool isLoading = false}) {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      color: Colors.grey.shade200,
+      alignment: Alignment.center,
+      child: isLoading
+          ? SizedBox(
+              height: 28,
+              width: 28,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.image_not_supported, color: Colors.grey.shade500, size: 40),
+                SizedBox(height: 6),
+                Text(
+                  'Изображение недоступно',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+              ],
+            ),
     );
   }
 }

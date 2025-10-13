@@ -35,10 +35,12 @@ class Recipe {
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
+    final rawImage = (json['image'] ?? json['imageUrl'])?.toString().trim();
+    final image = (rawImage == null || rawImage.isEmpty) ? null : rawImage;
     return Recipe(
       id: json['id'],
       title: json['title'],
-      imageUrl: json['image'],
+      imageUrl: image,
       readyInMinutes: json['readyInMinutes'] ?? 30,
       servings: json['servings'] ?? 4,
       summary: json['summary'],
