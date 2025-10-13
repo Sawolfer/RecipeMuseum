@@ -36,7 +36,14 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     final rawImage = (json['image'] ?? json['imageUrl'])?.toString().trim();
-    final image = (rawImage == null || rawImage.isEmpty) ? null : rawImage;
+    String? image;
+    if (rawImage != null && rawImage.isNotEmpty) {
+      if (rawImage.startsWith('http')) {
+        image = rawImage;
+      } else {
+        image = 'https://spoonacular.com/recipeImages/$rawImage';
+      }
+    }
     return Recipe(
       id: json['id'],
       title: json['title'],

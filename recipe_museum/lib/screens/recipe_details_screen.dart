@@ -33,6 +33,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = _recipe?.imageUrl;
     return Scaffold(
       appBar: AppBar(title: Text('Рецепт')),
       body: _isLoading
@@ -43,8 +44,24 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_recipe!.imageUrl != null)
-                        Image.network(_recipe!.imageUrl!, height: 300, width: double.infinity, fit: BoxFit.cover),
+                      if (imageUrl != null)
+                        Image.network(
+                          imageUrl,
+                          height: 300,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildImagePlaceholder();
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return _buildImagePlaceholder(isLoading: true);
+                          },
+                        )
+                      else
+                        _buildImagePlaceholder(),
                       
                       Padding(
                         padding: const EdgeInsets.all(16),
@@ -132,6 +149,32 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     if (await canLaunch(url)) {
       await launch(url);
     }
+  }
+
+  Widget _buildImagePlaceholder({bool isLoading = false}) {
+    return Container(
+      height: 300,
+      width: double.infinity,
+      color: Colors.grey.shade200,
+      alignment: Alignment.center,
+      child: isLoading
+          ? SizedBox(
+              height: 32,
+              width: 32,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.image_not_supported, color: Colors.grey.shade500, size: 48),
+                SizedBox(height: 8),
+                Text(
+                  'Изображение недоступно',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+              ],
+            ),
+    );
   }
 }
 
