@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../interactors/favorites_provider.dart';
 import '../models/recipe_model.dart';
 import '../screens/recipe_details_screen.dart';
 
@@ -10,6 +12,8 @@ class RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = recipe.imageUrl;
+    final favorites = context.watch<FavoritesProvider>();
+    final isFavorite = favorites.isFavorite(recipe.id);
     return Card(
       margin: EdgeInsets.all(8),
       child: InkWell(
@@ -64,11 +68,11 @@ class RecipeCard extends StatelessWidget {
                       Spacer(),
                       IconButton(
                         icon: Icon(
-                          recipe.isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: recipe.isFavorite ? Colors.red : null,
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : null,
                         ),
                         onPressed: () {
-                          // Логика добавления в избранное
+                          favorites.toggleFavorite(recipe);
                         },
                       ),
                     ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../interactors/api_service.dart';
+import '../interactors/favorites_provider.dart';
 import '../models/recipe_model.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
@@ -34,6 +36,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final imageUrl = _recipe?.imageUrl;
+    final favorites = context.watch<FavoritesProvider>();
+    final isFavorite = _recipe == null ? false : favorites.isFavorite(_recipe!.id);
     return Scaffold(
       appBar: AppBar(title: Text('Рецепт')),
       body: _isLoading
@@ -78,9 +82,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 _InfoItem(icon: Icons.people, text: '${_recipe!.servings} порций'),
                                 Spacer(),
                                 IconButton(
-                                  icon: Icon(_recipe!.isFavorite ? Icons.favorite : Icons.favorite_border),
+                                  icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                                   color: Colors.red,
-                                  onPressed: () => _toggleFavorite(),
+                                  onPressed: () => _toggleFavorite(favorites),
                                 ),
                               ],
                             ),
@@ -138,11 +142,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  void _toggleFavorite() {
-    setState(() {
-      _recipe!.isFavorite = !_recipe!.isFavorite;
-    });
-    // Здесь добавить сохранение в SharedPreferences
+  void _toggleFavorite(FavoritesProvider favorites) {
+    if (_recipe == null) {
+      return;
+    }
+    favorites.toggleFavorite(_recipe!);
   }
 
   Future<void> _launchUrl(String url) async {

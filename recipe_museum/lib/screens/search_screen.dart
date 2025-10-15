@@ -47,29 +47,22 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     try {
-      // Формируем строку запроса с фильтрами
-      String query = _searchController.text.trim();
-      
-      // Добавляем фильтры к запросу
-      String filters = '';
-      if (_selectedCuisine != null && _selectedCuisine != 'All') {
-        filters += '&cuisine=${_selectedCuisine!.toLowerCase()}';
-      }
-      if (_selectedDiet != null && _selectedDiet != 'All') {
-        filters += '&diet=${_selectedDiet!.toLowerCase().replaceAll(' ', '')}';
-      }
-      if (_maxReadyTime != null) {
-        filters += '&maxReadyTime=$_maxReadyTime';
-      }
-      if (_vegetarian) {
-        filters += '&vegetarian=true';
-      }
-      if (_vegan) {
-        filters += '&vegan=true';
-      }
-      
-      // Выполняем поиск
-      final results = await _apiService.searchRecipes(query);
+      final query = _searchController.text.trim();
+      final cuisine = (_selectedCuisine != null && _selectedCuisine != 'All')
+          ? _selectedCuisine!.toLowerCase()
+          : null;
+      final diet = (_selectedDiet != null && _selectedDiet != 'All')
+          ? _selectedDiet!.toLowerCase().replaceAll(' ', '')
+          : null;
+
+      final results = await _apiService.searchRecipes(
+        query,
+        cuisine: cuisine,
+        diet: diet,
+        maxReadyTime: _maxReadyTime,
+        vegetarian: _vegetarian,
+        vegan: _vegan,
+      );
       
       setState(() {
         _searchResults = results;
@@ -225,7 +218,9 @@ class _SearchScreenState extends State<SearchScreen> {
           Expanded(
             flex: _hasSearched ? 3 : 0,
             child: _hasSearched
-                    ? _searchResults.isEmpty
+                ? _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : _searchResults.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -257,7 +252,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               return RecipeCard(recipe: _searchResults[index]);
                             },
                           )
-                    : Container(),
+                : Container(),
           ),
         ],
       ),
